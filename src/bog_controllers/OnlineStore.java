@@ -6,8 +6,14 @@ import bog_models.CustomerType;
 import static java.lang.System.exit;
 
 import bog_views.GestionOS;
+import java.io.IOException;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 
-public class OnlineStore  { 
+public class OnlineStore  extends Application{ 
     private static GestionOS gestionOS;
 
     public static void printMenu(String[] options) {
@@ -22,7 +28,9 @@ public class OnlineStore  {
 
 
     public static void main(String[] args) throws Exception {
-        gestionOS = new GestionOS();
+        
+        launch(args);
+     /*   gestionOS = new GestionOS();
 
         // Show menu
         String[] options = {
@@ -83,7 +91,27 @@ public class OnlineStore  {
                 System.out.println("Please select a valid menu option");
                 scanner.next();
             }
-        }
+        }*/
 
+    } 
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(OnlineStore.class.getResource("/bog_views/MainView.fxml"));
+            //Cargo la ventana
+            Pane ventana = (Pane) loader.load();
+            
+            //Cargo la escena
+            Scene scene = new Scene(ventana);
+            
+            //Seteo la escena y la muestro
+            primaryStage.setScene(scene);
+            primaryStage.show();
+            
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }

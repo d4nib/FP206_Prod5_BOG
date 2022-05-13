@@ -50,16 +50,16 @@ public class Customer implements  Serializable{
         this.email = email;
         this.address = address;
         this.idCardNumber = idCardNumber;
-        this.customerDiscount = calculateDiscount();
         this.type = type;
+        this.customerDiscount = calculateDiscount();
         this.customerFee = calculateSippingFee();
     }
 
-    private int calculateDiscount() {
+    public int calculateDiscount() {
         return this.type == CustomerType.PREMIUM ? 20 : 0;
     }
 
-    private double calculateSippingFee(){
+    public double calculateSippingFee(){
         return this.type == CustomerType.PREMIUM ? 30 : 0;
     }
 
