@@ -99,6 +99,7 @@ public class HibernateOrderDao implements OrderDAO{
         try{
             HibernateUtil.buildSessionFactory();
             Session session = HibernateUtil.getCurrentSession();
+            session.beginTransaction();
             session.delete(eliminado);
             session.getTransaction().commit();
         }catch(Exception e){

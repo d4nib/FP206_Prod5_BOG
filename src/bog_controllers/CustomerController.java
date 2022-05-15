@@ -7,8 +7,10 @@ package bog_controllers;
 
 import bog_models.Customer;
 import bog_models.CustomerType;
+import bog_models.Data;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -71,19 +73,32 @@ public class CustomerController implements Initializable {
     ObservableList<Customer> customers;
     ObservableList<Customer> filterCustomers;
 
+    Data data;
+
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+
         tg = new ToggleGroup();
         btnRegular.setToggleGroup(tg);
         btnPremium.setToggleGroup(tg);
         btnNothing.setToggleGroup(tg);
         btnNothing.setSelected(true);
 
-        //Inicializar el ObservableList o lo que sea que usemos
-        customers = FXCollections.observableArrayList();
+        try {
+            this.data = new Data();
+        } catch (Exception e) {
+            System.err.println("Error creating Data. " + e);
+        }
+
+        //Inicializar el ObservableList con la base de datos
+        //customers = FXCollections.observableArrayList();
+        ArrayList<Customer> dataCustomers = data.getCustomers();
+        if (dataCustomers != null) {
+            customers = FXCollections.observableArrayList(dataCustomers);
+        }
 
         //Inicializar la Tabla
         this.tblCustomers.setItems(customers);
@@ -126,7 +141,16 @@ public class CustomerController implements Initializable {
             //Tras esperar a cerrar la otra ventana...
             Customer c = controller.getCustomer();
             if (c != null) {
+                //Añadimos a la DB
+                try {
+                    data.addCustomer(c);
+                } catch (Exception e) {
+
+                }
+                
+                //Añadimos a la memoria Local
                 this.customers.add(c);
+                
                 //Para que aparezca en el filtro
                 if (c.getType() == CustomerType.REGULAR && btnRegular.isSelected()
                         || c.getType() == CustomerType.PREMIUM && btnPremium.isSelected()) {
@@ -174,12 +198,19 @@ public class CustomerController implements Initializable {
                 //Tras esperar a cerrar la otra ventana...
                 Customer cSeleccionado = controller.getCustomer();
                 if (cSeleccionado != null) {
+                    //Update la DB
+                    try {
+                        data.updateCustomer(c);
+                    } catch (Exception e) {
+
+                    }
+
                     //Filtro
                     if (cSeleccionado.getType() != CustomerType.REGULAR && this.btnRegular.isSelected()
                             || cSeleccionado.getType() != CustomerType.PREMIUM && this.btnPremium.isSelected()) {
                         this.filterCustomers.remove(cSeleccionado);
                     }
-                    
+
                     this.tblCustomers.refresh();
                 }
 
@@ -204,8 +235,17 @@ public class CustomerController implements Initializable {
             alert.setContentText("No se ha seleccionado ningun Customer");
             alert.showAndWait();
         } else {
+            
 
+            //Eliminamos de la DB
+            try {
+                data.deleteCustomer(c);
+            } catch (Exception e) {
+                System.err.println("No se ha podido eliminar de la Base de datos." + e.getMessage());
+            }
+            //Eliminamos de la memoria local
             this.customers.remove(c);
+            
             this.tblCustomers.refresh();
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -224,14 +264,12 @@ public class CustomerController implements Initializable {
             this.filterCustomers.clear();
 
             if (this.btnRegular.isSelected()) {
-                System.out.println("REGULAR");
                 for (Customer c : this.customers) {
                     if (c.getType() == CustomerType.REGULAR) {
                         this.filterCustomers.add(c);
                     }
                 }
             } else if (this.btnPremium.isSelected()) {
-                System.out.println("PREMIUM");
                 for (Customer c : this.customers) {
                     if (c.getType() == CustomerType.PREMIUM) {
                         this.filterCustomers.add(c);

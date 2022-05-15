@@ -36,7 +36,6 @@ public class Product implements Serializable{
     }
     
     public Product(){
-        
     }
     // GETTERS & SETTERS
     public String getproductID() {

@@ -6,8 +6,10 @@
 package bog_controllers;
 
 import bog_models.Customer;
+import bog_models.Data;
 import bog_models.Product;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -37,8 +39,9 @@ public class ProductController implements Initializable {
 
     @FXML
     private TableView<Product> tblProducts;
+
     @FXML
-    private TableColumn colID;
+    private TableColumn colNumberID;
     @FXML
     private TableColumn colName;
     @FXML
@@ -57,20 +60,33 @@ public class ProductController implements Initializable {
     private Button btnDelete;
 
     ObservableList<Product> products;
+    Data data;
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        //Inicializar el ObservableList o lo que sea que usemos
-        products = FXCollections.observableArrayList();
+
+        try {
+            this.data = new Data();
+        } catch (Exception e) {
+            System.err.println("Error creating Data. " + e);
+        }
+
+        //Inicializar el ObservableList con la Base de Datos
+        ArrayList<Product> dataProducts = data.getProducts();
+        //products = FXCollections.observableArrayList();
+
+        if (dataProducts != null) {
+            products = FXCollections.observableArrayList(dataProducts);
+        }
 
         //Inicializar la tabla
         this.tblProducts.setItems(products);
 
         //Inicializar la columna poniendo el nombre del atributo del modelo
-        this.colID.setCellValueFactory(new PropertyValueFactory("productID"));
+        this.colNumberID.setCellValueFactory(new PropertyValueFactory("productID"));
         this.colName.setCellValueFactory(new PropertyValueFactory("productName"));
         this.colPrice.setCellValueFactory(new PropertyValueFactory("price"));
         this.colFee.setCellValueFactory(new PropertyValueFactory("shippingFee"));
@@ -99,9 +115,17 @@ public class ProductController implements Initializable {
             //Tras esperar a cerrar la otra ventana...
             Product p = controller.getProduct();
             if (p != null) {
+                //Añadimos a la DB
+                try {
+                    data.addProduct(p);
+                } catch (Exception e) {
+
+                }
+
+                //Añadimos a la memoria local
                 this.products.add(p);
                 //Para que aparezca en el filtro
-                
+
                 this.tblProducts.refresh();
 
             }
@@ -144,10 +168,17 @@ public class ProductController implements Initializable {
                 //Tras esperar a cerrar la otra ventana...
                 Product pSeleccionado = controller.getProduct();
                 if (pSeleccionado != null) {
-                    
-                    //Para que aparezca en el filtro
+                    //Update la DB
+                    try {
+                        data.updateProduct(p);
+                    } catch (Exception e) {
 
+                    }
+                    //Para que aparezca en el filtro
+                    
+                    
                     this.tblProducts.refresh();
+                    txtDescription.setText(pSeleccionado.getDescription());
 
                 }
 
@@ -172,10 +203,17 @@ public class ProductController implements Initializable {
             alert.setContentText("No se ha seleccionado ningun Product");
             alert.showAndWait();
         } else {
+            //Eliminamos de la DB
+            try {
+                data.deleteProduct(p);
+            } catch (Exception e) {
 
+            }
+            //Eliminamos 
             this.products.remove(p);
             this.tblProducts.refresh();
-
+            txtDescription.clear();
+            
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setHeaderText(null);
             alert.setTitle("Información");
@@ -206,8 +244,8 @@ public class ProductController implements Initializable {
     @FXML
     private void select(MouseEvent event) {
         Product p = this.tblProducts.getSelectionModel().getSelectedItem();
-        
-        if(p != null){
+
+        if (p != null) {
             txtDescription.setText(p.getDescription());
         }
     }

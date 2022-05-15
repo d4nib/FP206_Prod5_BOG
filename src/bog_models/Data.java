@@ -85,6 +85,15 @@ public class Data {
         this.daoManager.getCustomerDAO().delete(customer);
         this.customers = readDBCustomers();
     }
+    
+    public void updateCustomer(Customer customer) throws DAOException{
+        try {
+            this.daoManager.getCustomerDAO().update(customer);
+            this.customers = readDBCustomers();
+        } catch (DAOException e) {
+            throw  e;
+        }
+    }
 
     // Product data functions ******************************************************************
     public ArrayList<Product> getProducts() {
@@ -101,6 +110,15 @@ public class Data {
             this.products = readDBProducts();
         } catch (Exception e) {
             throw e;
+        }
+    }
+    
+    public void updateProduct(Product product) throws DAOException{
+        try {
+            this.daoManager.getProductDAO().update(product);
+            this.products = readDBProducts();
+        } catch (DAOException e) {
+            throw  e;
         }
     }
 
